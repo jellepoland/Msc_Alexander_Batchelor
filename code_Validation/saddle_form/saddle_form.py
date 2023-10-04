@@ -1,14 +1,19 @@
+#%%
 """
 Script for PS framework validation, benchmark case where saddle form of self stressed network is sought
 """
+
+import sys, os
+sys.path.append(os.path.abspath('../..'))
+
 import numpy as np
 import saddle_form_input as input
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 import pandas as pd
 import time
-from Msc_Alexander_Batchelor.src.particleSystem.ParticleSystem import ParticleSystem
-
+from src.particleSystem.ParticleSystem import ParticleSystem
+%matplotlib widget
 
 def instantiate_ps():
     return ParticleSystem(input.c_matrix, input.init_cond, input.params)
@@ -123,3 +128,5 @@ if __name__ == "__main__":
     ps2 = instantiate_ps()
 
     plot(ps, ps2)
+
+# %%
