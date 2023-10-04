@@ -7,20 +7,19 @@ import sys, os
 sys.path.append(os.path.abspath('../..'))
 
 import numpy as np
-import saddle_form_input as input
+import code_Validation.saddle_form_kite.saddle_form_input as input
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 import pandas as pd
 import time
 from src.particleSystem.ParticleSystem import ParticleSystem
-%matplotlib widget
+# %matplotlib widget
 
 def instantiate_ps():
     # c_matrix = damping
     # init_cond = initial_conditions
     # params = input.params
     return ParticleSystem(input.c_matrix, input.init_cond, input.params)
-
 
 def plot(psystem: ParticleSystem, psystem2: ParticleSystem):
     n = input.params['n']
@@ -36,10 +35,14 @@ def plot(psystem: ParticleSystem, psystem2: ParticleSystem):
     position2 = pd.DataFrame(index=t_vector, columns=x)
 
     n = input.params["n"]
-    f_ext = np.array([[0, 0, 0] for i in range(n)]).flatten()
+    f_ext = np.array([[0, 0, 1e3] for i in range(n)]).flatten()
 
     start_time = time.time()
     for step in t_vector:           # propagating the simulation for each timestep and saving results
+        
+        # external force
+
+        # internal force (structural solver - the magic happens here) 
         position.loc[step], _ = psystem.simulate(f_ext)
 
         residual_f = np.abs(psystem.f_int[3:-3])
@@ -78,6 +81,14 @@ def plot(psystem: ParticleSystem, psystem2: ParticleSystem):
     ax = fig.add_subplot(1, 2, 1, projection="3d")
     ax2 = fig.add_subplot(1, 2, 2, projection="3d")
 
+    # ensuring the axis are scaled properly
+    ax.set_xlim(-5, 5)
+    ax.set_ylim(-5, 5)
+    ax.set_zlim(0, 10)
+    ax2.set_xlim(-5, 5)
+    ax2.set_ylim(-5, 5)
+    ax2.set_zlim(0, 10)
+
     b = np.nonzero(np.triu(input.c_matrix))
     b = np.column_stack((b[0], b[1]))
 
@@ -89,6 +100,8 @@ def plot(psystem: ParticleSystem, psystem2: ParticleSystem):
         X_f.append(position[f"x{i + 1}"].iloc[-1])
         Y_f.append(position[f"y{i + 1}"].iloc[-1])
         Z_f.append(position[f"z{i + 1}"].iloc[-1])
+
+    
 
     # plot inital layout
     ax.scatter(X, Y, Z, c='red')

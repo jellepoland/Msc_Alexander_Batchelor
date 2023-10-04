@@ -1,3 +1,5 @@
+#%%
+
 """
 Input file for validation of PS, benchmark case where form of self-stressed saddle is sought
 """
@@ -26,6 +28,8 @@ def connectivity_matrix(grid_size: int):
             connections.append([i, i - grid_size + 1])
             connections.append([i, i + grid_size - 1])
             connections.append([i, i + grid_size])
+
+    print(f'connections:{connections}')
 
     matrix = np.zeros((n, n))
 
