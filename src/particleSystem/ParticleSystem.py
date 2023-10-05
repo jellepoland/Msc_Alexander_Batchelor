@@ -75,9 +75,11 @@ class ParticleSystem:
     def __instantiate_springdampers(self):
         b = np.nonzero(np.triu(self.__connectivity_matrix))
         self.__b = np.column_stack((b[0], b[1]))
-        for index in self.__b:
+        for i,index in enumerate(self.__b):
+            #TODO: Jelle - altered self.__l0 to take both particle indices into account
+            # also added this enumarete statement to enter the right l0 value
             self.__springdampers.append(SpringDamper(self.__particles[index[0]], self.__particles[index[1]],
-                                        self.__k, self.__l0, self.__c, self.__dt))
+                                        self.__k, self.__l0[i], self.__c, self.__dt))
         return
 
     def __construct_m_matrix(self):

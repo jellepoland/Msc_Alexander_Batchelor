@@ -7,7 +7,7 @@ import sys, os
 sys.path.append(os.path.abspath('../..'))
 
 import numpy as np
-import saddle_form_input as input
+import code_Validation.saddle_form.saddle_form_input as input
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 import pandas as pd
@@ -102,6 +102,7 @@ def plot(psystem: ParticleSystem, psystem2: ParticleSystem):
         ax2.plot([X_f[indices[0]], X_f[indices[1]]], [Y_f[indices[0]], Y_f[indices[1]]], [Z_f[indices[0]],
                 Z_f[indices[1]]], color='black')
 
+    # print(f"position[1]: {position.iloc[1]}")
     # surf = ax.plot_surface(X, Y, Z)#, rstride=1, cstride=1, cmap=cm.coolwarm,linewidth=0, antialiased=False)
 
     # plt.xlabel("time [s]")

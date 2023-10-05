@@ -97,15 +97,26 @@ params = {
 }
 
 # calculated parameters
-params["l0"] = 0#np.sqrt( 2 * (grid_length/(grid_size-1))**2)
+#np.sqrt( 2 * (grid_length/(grid_size-1))**2)
 params["m_segment"] = 1
 params["k"] = params["k_t"] * (params["n"] - 1)  # segment stiffness
 params["n"] = grid_size ** 2 + (grid_size - 1) ** 2
 
-
 # instantiate connectivity matrix and initial conditions array
 c_matrix, f_nodes = connectivity_matrix(grid_size)
 init_cond = initial_conditions(grid_size, params["m_segment"], f_nodes, grid_height, grid_length)
+
+# calculating intial rest-lengths
+position_initial = [position for position, velocity, mass, fixed in init_cond]
+rest_lengths = []
+connections = np.column_stack(np.nonzero(np.triu(c_matrix)))
+for i,connections_i in enumerate(connections):
+    p1 = np.array(position_initial[connections_i[0]])
+    p2 = np.array(position_initial[connections_i[1]])
+    rest_lengths.append(np.linalg.norm(p2-p1))
+
+# params["l0"] = np.zeros(len(rest_lengths))
+params["l0"] = .99*np.array(rest_lengths)
 
 # print(init_cond)
 

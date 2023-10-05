@@ -1,3 +1,4 @@
+
 """
 Child Class 'SpringDamper', for spring-damper objects to be instantiated in ParticleSystem
 """
@@ -38,7 +39,9 @@ class SpringDamper(ImplicitForce):
         else:
             unit_vector = np.array([0, 0, 0])
 
-        f_spring = -self.__k * (norm_pos - self.__l0) * unit_vector
+        rest_length = self.__l0 #TODO: Jelle
+        # print(f'rest_length: {rest_length}')
+        f_spring = -self.__k * (norm_pos - rest_length) * unit_vector
         return np.squeeze(f_spring)
 
     def __calculate_f_damping(self):

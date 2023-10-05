@@ -8,12 +8,21 @@ sys.path.append(os.path.abspath('../..'))
 
 import numpy as np
 import code_Validation.saddle_form_kite.saddle_form_input as input
+import code_Validation.saddle_form_kite.kite_functions as kite_functions
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 import pandas as pd
 import time
 from src.particleSystem.ParticleSystem import ParticleSystem
-# %matplotlib widget
+%matplotlib widget
+
+#changing the input parameters
+input.params["c"] = 30
+input.params["k"] = 1e4
+input.params["dt"] = 0.01
+input.params["t_steps"] = int(1e3)
+input.vel_app = np.array([20,0,2])
+
 
 def instantiate_ps():
     # c_matrix = damping
@@ -35,21 +44,46 @@ def plot(psystem: ParticleSystem, psystem2: ParticleSystem):
     position2 = pd.DataFrame(index=t_vector, columns=x)
 
     n = input.params["n"]
-    f_ext = np.array([[0, 0, 1e3] for i in range(n)]).flatten()
+    points = np.array([init_cond_i[0] for init_cond_i in input.init_cond])
 
     start_time = time.time()
-    for step in t_vector:           # propagating the simulation for each timestep and saving results
+    for i,step in enumerate(t_vector):           # propagating the simulation for each timestep and saving results
         
-        # external force
+        ## external force
+        # Plate-aero static aero
+        force_aero_wing = kite_functions.calculate_force_aero_plate(input.plate_point_indices,points,input.vel_app,input.area_projected,input.rho,equal_boolean=False)
 
-        # internal force (structural solver - the magic happens here) 
-        position.loc[step], _ = psystem.simulate(f_ext)
+        # print(f'force_aero_wing: {force_aero_wing}')
+        # old definition
+        # f_ext = np.array([[0, 0, 1e3] for i in range(n)]).flatten()
+
+        f_ext = force_aero_wing.flatten()
+        ## internal force (structural solver - the magic happens here) 
+        # position.loc[step], _ = psystem.simulate(f_ext)
+        position.loc[step],_ = psystem.kin_damp_sim(f_ext)
+
+        # saving the points for next-iteration
+        # points = []
+        # for n_i in range(n):
+        #     X = (position[f"x{n_i + 1}"].iloc[i])
+        #     Y = (position[f"y{n_i + 1}"].iloc[i])
+        #     Z = (position[f"z{n_i + 1}"].iloc[i])
+        #     points.append(np.array([X,Y,Z]))
+        # points = np.array(points)
+
+        points = np.array([
+                [position[f'x{n_i + 1}'].iloc[i], 
+                position[f'y{n_i + 1}'].iloc[i], 
+                position[f'z{n_i + 1}'].iloc[i]]
+                for n_i in range(n)
+        ])
 
         residual_f = np.abs(psystem.f_int[3:-3])
 
         if np.linalg.norm(residual_f) <= 1e-3:
             print("Classic PS converged")
             break
+
     stop_time = time.time()
 
     # start_time2 = time.time()
