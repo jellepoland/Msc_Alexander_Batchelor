@@ -18,10 +18,10 @@ from src.particleSystem.ParticleSystem import ParticleSystem
 
 #changing the input parameters
 input.params["c"] = 30
-input.params["k"] = 1e4
+input.params["k"] = 2.5e4
 input.params["dt"] = 0.01
-input.params["t_steps"] = int(1e3)
-input.vel_app = np.array([20,0,2])
+input.params["t_steps"] = int(2e2)
+input.vel_app = np.array([20,0,1.5])
 
 
 def instantiate_ps():
