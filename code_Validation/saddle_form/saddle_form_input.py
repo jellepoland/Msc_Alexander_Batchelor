@@ -115,8 +115,8 @@ for i,connections_i in enumerate(connections):
     p2 = np.array(position_initial[connections_i[1]])
     rest_lengths.append(np.linalg.norm(p2-p1))
 
-# params["l0"] = np.zeros(len(rest_lengths))
-params["l0"] = .99*np.array(rest_lengths)
+params["l0"] = np.zeros(len(rest_lengths))
+# params["l0"] =0.  .99*np.array(rest_lengths)
 
 # print(init_cond)
 

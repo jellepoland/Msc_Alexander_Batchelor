@@ -20,14 +20,37 @@ class ParticleSystem:
                                    required for the particle constructor: [initial_pos, initial_vel, mass, fixed: bool]
         :param sim_param: Dictionary of other parameters required (k, l0, dt, ...)
         """
+
+        ##TODO: don't need to define these in here
+        ## can also just call them within the functions
+        # e.g. self__k = sim_param["k"] is only used in the __one_d_force_vector function
+        # so we can just call it there and leave it out of the beginning
+        # THIS does create import problems, just calling self is easier for now
+
+        # particles
+        # self.__position 
+        # self.__velocity
+        # self.__mass
+        # self.__fixed
+        ##TODO: add a particle specific damping coefficient
+
+        # springdampers
         self.__connectivity_matrix = np.array(connectivity_matrix)
         self.__k = sim_param["k"]
         self.__l0 = sim_param["l0"]
-        self.__c = sim_param["c"]
+        self.__is_compression = sim_param["is_compression"]
+        self.__is_tension = sim_param["is_tension"]
+        self.__is_pulley = sim_param["is_pulley"]
+        self.__is_rotational = sim_param["is_rotational"]
+
+        # other
         self.__dt = sim_param["dt"]
         self.__g = sim_param["g"]
         self.__n = sim_param["n"]
 
+        ##TODO: split damping particle & spring-damping specific
+        self.__c = sim_param["c"]
+        
         self.__rtol = sim_param["rel_tol"]
         self.__atol = sim_param["abs_tol"]
         self.__maxiter = sim_param["max_iter"]
@@ -76,10 +99,9 @@ class ParticleSystem:
         b = np.nonzero(np.triu(self.__connectivity_matrix))
         self.__b = np.column_stack((b[0], b[1]))
         for i,index in enumerate(self.__b):
-            #TODO: Jelle - altered self.__l0 to take both particle indices into account
-            # also added this enumarete statement to enter the right l0 value
             self.__springdampers.append(SpringDamper(self.__particles[index[0]], self.__particles[index[1]],
-                                        self.__k, self.__l0[i], self.__c, self.__dt))
+                                        self.__k[i], self.__l0[i], self.__c, self.__dt, self.__is_compression[i],
+                                        self.__is_tension[i], self.__is_pulley[i],self.__is_rotational[i]))
         return
 
     def __construct_m_matrix(self):
@@ -164,6 +186,7 @@ class ParticleSystem:
 
         # print(self.__b)
 
+        #TODO: change n to i, n is confusing
         for n in range(len(self.__springdampers)):
             fs, fd = self.__springdampers[n].force_value()
             i, j = self.__b[n]

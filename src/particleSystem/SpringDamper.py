@@ -8,10 +8,16 @@ import numpy as np
 
 class SpringDamper(ImplicitForce):
 
-    def __init__(self, p1: Particle, p2: Particle, k: float, l0: float, c: float, dt: float):
+    def __init__(self, p1: Particle, p2: Particle, k: float, l0: float, c: float, dt: float, 
+                 is_compression: bool = True, is_tension: bool = True, 
+                 is_pulley: bool = False, is_rotational: bool = False):
         self.__k = k
         self.__c = c
         self.__l0 = l0
+        self.__is_compression = is_compression
+        self.__is_tension = is_tension
+        self.__is_pulley = is_pulley
+        self.__is_rotational = is_rotational 
         self.__dt = dt
         super().__init__(p1, p2)
         return
@@ -31,17 +37,35 @@ class SpringDamper(ImplicitForce):
         return self.__calculate_f_spring(), self.__calculate_f_damping()
 
     def __calculate_f_spring(self):
-        relative_pos = self.__relative_pos()
-        norm_pos = np.linalg.norm(relative_pos)
-
-        if norm_pos != 0:
-            unit_vector = relative_pos / norm_pos
+        if self.__is_pulley:
+            relative_pos = self.__relative_pos()
+            norm_pos = np.linalg.norm(relative_pos)
         else:
-            unit_vector = np.array([0, 0, 0])
+            relative_pos = self.__relative_pos()
+            norm_pos = np.linalg.norm(relative_pos)
 
-        rest_length = self.__l0 #TODO: Jelle
-        # print(f'rest_length: {rest_length}')
-        f_spring = -self.__k * (norm_pos - rest_length) * unit_vector
+        # if norm_pos != 0:
+        #     unit_vector = relative_pos / norm_pos
+        # else:
+        #     unit_vector = np.array([0, 0, 0])
+
+        rest_length = self.__l0 
+        delta_length = norm_pos - rest_length
+        #TODO: could write these 3 statetements as one if statement
+        # if extended AND no tension-resistance
+        if delta_length > 0 and not self.__is_tension:
+            unit_vector = np.array([0, 0, 0])
+        # if compressed AND no compression-resistance
+        elif delta_length < 0 and not self.__is_compression:
+            unit_vector = np.array([0, 0, 0])
+        # if delta_length is 0 OR distance is zero 
+        elif delta_length == 0 or norm_pos == 0:
+            unit_vector = np.array([0, 0, 0])
+        # if just compressed / stretch with resistance
+        else:
+            unit_vector = relative_pos / norm_pos
+
+        f_spring = -self.__k * delta_length * unit_vector
         return np.squeeze(f_spring)
 
     def __calculate_f_damping(self):

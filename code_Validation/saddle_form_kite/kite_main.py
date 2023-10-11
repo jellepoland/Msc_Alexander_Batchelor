@@ -2,12 +2,14 @@
 """
 Script for PS framework validation, benchmark case where saddle form of self stressed network is sought
 """
+%load_ext autoreload
+%autoreload 2
 
 import sys, os
 sys.path.append(os.path.abspath('../..'))
 
 import numpy as np
-import code_Validation.saddle_form_kite.saddle_form_input as input
+import code_Validation.saddle_form_kite.kite_input as input
 import code_Validation.saddle_form_kite.kite_functions as kite_functions
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
@@ -17,11 +19,16 @@ from src.particleSystem.ParticleSystem import ParticleSystem
 %matplotlib widget
 
 #changing the input parameters
-input.params["c"] = 30
-input.params["k"] = 2.5e4
 input.params["dt"] = 0.01
 input.params["t_steps"] = int(2e2)
-input.vel_app = np.array([20,0,1.5])
+input.vel_app = np.array([17,0,3])
+input.params["c"] = 0 # *np.ones(len(rest_lengths))
+
+
+# params
+# particle settings
+# element settings
+### INPUT
 
 
 def instantiate_ps():
@@ -112,8 +119,8 @@ def plot(psystem: ParticleSystem, psystem2: ParticleSystem):
         Z.append(position[f"z{i + 1}"].iloc[0])
 
     fig= plt.figure(figsize=plt.figaspect(0.5))
-    ax = fig.add_subplot(1, 2, 1, projection="3d")
-    ax2 = fig.add_subplot(1, 2, 2, projection="3d")
+    ax = fig.add_subplot(1, 2, 2, projection="3d")
+    ax2 = fig.add_subplot(1, 2, 1, projection="3d")
 
     # ensuring the axis are scaled properly
     ax.set_xlim(-5, 5)
