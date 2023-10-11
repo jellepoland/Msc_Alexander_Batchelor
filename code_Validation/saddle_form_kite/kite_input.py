@@ -85,7 +85,7 @@ stiffness_tube =  1.e4
 stiffness_bridle = 1.2e4
 
 # initialising connectivities
-pulley_indices = []
+pulley_indices = [80]
 #TODO: for now just making each wing element a tube.
 canopy_indices = []
 tube_indices = [i for i,conn in enumerate(wing_connectivity)]
@@ -99,37 +99,41 @@ is_pulley_list = []
 
 for i,conn in enumerate(connections_kite): 
     if float(i) < len(wing_connectivity):
-        is_tension_list.append("True")
-        is_pulley_list.append("False")
+        is_tension_list.append(True)
+        is_pulley_list.append(False)
         
         if i in canopy_indices:
             stiffness_list.append(stiffness_canopy)
-            is_compression_list.append("False")
-            is_rotational_list.append("False")
+            is_compression_list.append(False)
+            is_rotational_list.append(False)
         elif i in tube_indices:
             stiffness_list.append(stiffness_tube)
-            is_compression_list.append("True")
-            is_rotational_list.append("True")
+            is_compression_list.append(True)
+            is_rotational_list.append(True)
         else:
             print("ERROR - wing element is neither canopy nor tube?")
 
     else: # if bridle-lines
-        is_compression_list.append("False")
-        is_tension_list.append("True")
-        is_rotational_list.append("True")
+        is_compression_list.append(False)
+        is_tension_list.append(True)
+        is_rotational_list.append(True)
         stiffness_list.append(stiffness_bridle)
         if i in pulley_indices:
-            is_pulley_list.append("True")
+            is_pulley_list.append(True)
         else:
-            is_pulley_list.append("False")
-
+            is_pulley_list.append(False)
 
 params["k"] = np.array(stiffness_list)#2.5e4*np.ones(len(rest_lengths))
 params["is_compression"] = is_compression_list
 params["is_tension"] = is_tension_list
 params["is_pulley"] = is_pulley_list
-params["is_rotational"] = is_rotational_list
 
+pulley_line_index = 80
+idx_p3,idx_p4 = 20,21
+#rest_length = rest_lengths[pulley_line_index] 
+rest_length = 1.
+params["pulley_other_line_pair"] = {'80': [idx_p3,idx_p4,rest_length]}
+params["is_rotational"] = is_rotational_list
 
 # needed for plate_aero
 vel_app = np.array([20,0,6])

@@ -41,6 +41,7 @@ class ParticleSystem:
         self.__is_compression = sim_param["is_compression"]
         self.__is_tension = sim_param["is_tension"]
         self.__is_pulley = sim_param["is_pulley"]
+        self.__pulley_other_line_pair= sim_param["pulley_other_line_pair"]
         self.__is_rotational = sim_param["is_rotational"]
 
         # other
@@ -135,7 +136,7 @@ class ParticleSystem:
         # print("conditioning A:", np.linalg.cond(A))
 
         for i in range(self.__n):
-            if self.__particles[i].fixed:
+            if self.__particles[i].fixed == True:
                 A[i * 3: (i + 1) * 3] = 0        # zeroes out row i to i + 3
                 A[:, i * 3: (i + 1) * 3] = 0     # zeroes out column i to i + 3
                 b[i * 3: (i + 1) * 3] = 0        # zeroes out row i
@@ -151,7 +152,7 @@ class ParticleSystem:
         return x_next, v_next
 
     def kin_damp_sim(self, f_ext: npt.ArrayLike):       # kinetic damping alghorithm
-        if self.__vis_damp:         # Condition resetting viscous damping to 0
+        if self.__vis_damp == True:         # Condition resetting viscous damping to 0
             self.__c = 0
             self.__springdampers = []
             self.__instantiate_springdampers()
@@ -186,10 +187,21 @@ class ParticleSystem:
 
         # print(self.__b)
 
-        #TODO: change n to i, n is confusing
-        for n in range(len(self.__springdampers)):
-            fs, fd = self.__springdampers[n].force_value()
-            i, j = self.__b[n]
+        for idx in range(len(self.__springdampers)):
+            
+            # Pulleys
+            if self.__is_pulley[idx] == True:
+                idx_p3,idx_p4, rest_length_p3p4 = self.__pulley_other_line_pair[str(idx)]
+                points = self.__pack_x_current()
+                p3 = points[idx_p3]
+                p4 = points[idx_p4]
+                norm_p3p4 = np.linalg.norm(p3 - p4)
+                extra_delta_length = norm_p3p4 - rest_length_p3p4
+                fs, fd = self.__springdampers[idx].force_value(extra_delta_length)
+            else:
+                fs, fd = self.__springdampers[idx].force_value(extra_delta_length)
+            
+            i, j = self.__b[idx]
 
             self.__f[i*3: i*3 + 3] += fs + fd
             self.__f[j*3: j*3 + 3] -= fs + fd

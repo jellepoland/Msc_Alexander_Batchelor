@@ -33,16 +33,13 @@ class SpringDamper(ImplicitForce):
     def __relative_vel(self):
         return np.array([self.p1.v - self.p2.v])
 
-    def force_value(self):
-        return self.__calculate_f_spring(), self.__calculate_f_damping()
+    def force_value(self,extra_rest_length: float = 0):
+        return self.__calculate_f_spring(extra_rest_length), self.__calculate_f_damping()
 
-    def __calculate_f_spring(self):
-        if self.__is_pulley:
-            relative_pos = self.__relative_pos()
-            norm_pos = np.linalg.norm(relative_pos)
-        else:
-            relative_pos = self.__relative_pos()
-            norm_pos = np.linalg.norm(relative_pos)
+    def __calculate_f_spring(self,extra_rest_length: float = 0):
+
+        relative_pos = self.__relative_pos()
+        norm_pos = np.linalg.norm(relative_pos)
 
         # if norm_pos != 0:
         #     unit_vector = relative_pos / norm_pos
@@ -51,12 +48,16 @@ class SpringDamper(ImplicitForce):
 
         rest_length = self.__l0 
         delta_length = norm_pos - rest_length
+        # pulley
+        if self.__is_pulley == True:
+            delta_length += extra_rest_length
+
         #TODO: could write these 3 statetements as one if statement
         # if extended AND no tension-resistance
-        if delta_length > 0 and not self.__is_tension:
+        if delta_length > 0 and self.__is_tension == False:
             unit_vector = np.array([0, 0, 0])
         # if compressed AND no compression-resistance
-        elif delta_length < 0 and not self.__is_compression:
+        elif delta_length < 0 and self.__is_compression == False:
             unit_vector = np.array([0, 0, 0])
         # if delta_length is 0 OR distance is zero 
         elif delta_length == 0 or norm_pos == 0:
