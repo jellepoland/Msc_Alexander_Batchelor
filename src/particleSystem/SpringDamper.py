@@ -41,30 +41,23 @@ class SpringDamper(ImplicitForce):
         relative_pos = self.__relative_pos()
         norm_pos = np.linalg.norm(relative_pos)
 
-        # if norm_pos != 0:
-        #     unit_vector = relative_pos / norm_pos
-        # else:
-        #     unit_vector = np.array([0, 0, 0])
-
         rest_length = self.__l0 
         delta_length = norm_pos - rest_length
-        # pulley
-        if self.__is_pulley == True:
+        
+        if self.__is_pulley: #checking for pulleys
             delta_length += delta_length_pulley_other_line
 
-        #TODO: could write these 3 statetements as one if statement
         # if extended AND no tension-resistance
-        if delta_length > 0 and self.__is_tension == False:
+        # or if compressed AND no compression-resistance
+        # or if delta_length is 0 OR distance is zero
+        if (delta_length > 0 and not self.__is_tension) or \
+            (delta_length < 0 and self.__is_compression) or \
+            (delta_length == 0 or norm_pos == 0):
             unit_vector = np.array([0, 0, 0])
-        # if compressed AND no compression-resistance
-        elif delta_length < 0 and self.__is_compression == False:
-            unit_vector = np.array([0, 0, 0])
-        # if delta_length is 0 OR distance is zero 
-        elif delta_length == 0 or norm_pos == 0:
-            unit_vector = np.array([0, 0, 0])
-        # if just compressed / stretch with resistance
-        else:
+        
+        else: # if compressed / stretch with resistance
             unit_vector = relative_pos / norm_pos
+
 
         f_spring = -self.__k * delta_length * unit_vector
         return np.squeeze(f_spring)

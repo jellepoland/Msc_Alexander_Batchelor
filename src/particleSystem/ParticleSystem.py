@@ -136,7 +136,7 @@ class ParticleSystem:
         # print("conditioning A:", np.linalg.cond(A))
 
         for i in range(self.__n):
-            if self.__particles[i].fixed == True:
+            if self.__particles[i].fixed:
                 A[i * 3: (i + 1) * 3] = 0        # zeroes out row i to i + 3
                 A[:, i * 3: (i + 1) * 3] = 0     # zeroes out column i to i + 3
                 b[i * 3: (i + 1) * 3] = 0        # zeroes out row i
@@ -152,7 +152,7 @@ class ParticleSystem:
         return x_next, v_next
 
     def kin_damp_sim(self, f_ext: npt.ArrayLike):       # kinetic damping alghorithm
-        if self.__vis_damp == True:         # Condition resetting viscous damping to 0
+        if self.__vis_damp:         # Condition resetting viscous damping to 0
             self.__c = 0
             self.__springdampers = []
             self.__instantiate_springdampers()
@@ -185,27 +185,18 @@ class ParticleSystem:
     def __one_d_force_vector(self):
         self.__f[self.__f != 0] = 0
 
-        # print(self.__b)
-
         for idx in range(len(self.__springdampers)):
-            
-            # Pulleys
-            if self.__is_pulley[idx] == True:
-                # print(" we got a pulley")
-                # print(self.__pulley_other_line_pair)
+
+            if self.__is_pulley[idx]: # if pulley
                 idx_p3,idx_p4, rest_length_p3p4 = self.__pulley_other_line_pair[str(idx)]
-                # print(f"idx_p3: {idx_p3}, idx_p4: {idx_p4}")
                 points = self.__pack_x_current()
-                # print(f"points: {points}, {len(points)}")
+                # points are flat, so we need to configure a bit
                 p3 = np.array([points[int(idx_p3)*3:int(idx_p3)*3+3]])
                 p4 = np.array([points[int(idx_p4)*3:int(idx_p4)*3+3]])
-                # print(f'p3: {p3}, p4: {p4}')
                 norm_p3p4 = np.linalg.norm(p3 - p4)
-                # print(f'norm_p3p4: {norm_p3p4}')
                 delta_length_pulley_other_line = norm_p3p4 - rest_length_p3p4
-                # print(f'delta_length_pulley_other_line: {delta_length_pulley_other_line}')
                 fs, fd = self.__springdampers[idx].force_value(delta_length_pulley_other_line)
-            else:
+            else: # if just spring-damper
                 fs, fd = self.__springdampers[idx].force_value()
             
             i, j = self.__b[idx]

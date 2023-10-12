@@ -248,6 +248,7 @@ def calculate_force_aero_plate(plate_point_indices,pos,vel_app,A_projected,rho,e
 
         # AoA is equal to aoa_p
         Cl_p = 2*np.pi*np.sin(aoa_p)
+        # print(f"aoa_p: {np.rad2deg(aoa_p):.2f}deg")
         L_p = 0.5*rho*(Va_norm**2)*Cl_p*(area_p)
 
         ## Splitting lift 

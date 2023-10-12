@@ -144,7 +144,6 @@ def plot(psystem: ParticleSystem, psystem2: ParticleSystem):
         Z_f.append(position[f"z{i + 1}"].iloc[-1])
 
     
-
     # plot inital layout
     ax.scatter(X, Y, Z, c='red')
     for indices in b:
