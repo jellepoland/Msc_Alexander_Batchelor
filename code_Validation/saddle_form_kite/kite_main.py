@@ -19,7 +19,7 @@ from src.particleSystem.ParticleSystem import ParticleSystem
 %matplotlib widget
 
 #changing the input parameters
-input.params["dt"] = 0.01
+input.params["dt"] = 0.005
 input.params["t_steps"] = int(2e2)
 input.vel_app = np.array([17,0,3])
 input.params["c"] = 0 # *np.ones(len(rest_lengths))

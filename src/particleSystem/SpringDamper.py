@@ -36,7 +36,7 @@ class SpringDamper(ImplicitForce):
     def force_value(self,extra_rest_length: float = 0):
         return self.__calculate_f_spring(extra_rest_length), self.__calculate_f_damping()
 
-    def __calculate_f_spring(self,extra_rest_length: float = 0):
+    def __calculate_f_spring(self,delta_length_pulley_other_line: float = 0):
 
         relative_pos = self.__relative_pos()
         norm_pos = np.linalg.norm(relative_pos)
@@ -50,7 +50,7 @@ class SpringDamper(ImplicitForce):
         delta_length = norm_pos - rest_length
         # pulley
         if self.__is_pulley == True:
-            delta_length += extra_rest_length
+            delta_length += delta_length_pulley_other_line
 
         #TODO: could write these 3 statetements as one if statement
         # if extended AND no tension-resistance

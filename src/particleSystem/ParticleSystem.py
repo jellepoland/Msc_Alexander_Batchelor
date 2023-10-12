@@ -191,13 +191,20 @@ class ParticleSystem:
             
             # Pulleys
             if self.__is_pulley[idx] == True:
+                # print(" we got a pulley")
+                # print(self.__pulley_other_line_pair)
                 idx_p3,idx_p4, rest_length_p3p4 = self.__pulley_other_line_pair[str(idx)]
+                # print(f"idx_p3: {idx_p3}, idx_p4: {idx_p4}")
                 points = self.__pack_x_current()
-                p3 = points[idx_p3]
-                p4 = points[idx_p4]
+                # print(f"points: {points}, {len(points)}")
+                p3 = np.array([points[int(idx_p3)*3:int(idx_p3)*3+3]])
+                p4 = np.array([points[int(idx_p4)*3:int(idx_p4)*3+3]])
+                # print(f'p3: {p3}, p4: {p4}')
                 norm_p3p4 = np.linalg.norm(p3 - p4)
-                extra_rest_length = norm_p3p4 - rest_length_p3p4
-                fs, fd = self.__springdampers[idx].force_value(extra_rest_length)
+                # print(f'norm_p3p4: {norm_p3p4}')
+                delta_length_pulley_other_line = norm_p3p4 - rest_length_p3p4
+                # print(f'delta_length_pulley_other_line: {delta_length_pulley_other_line}')
+                fs, fd = self.__springdampers[idx].force_value(delta_length_pulley_other_line)
             else:
                 fs, fd = self.__springdampers[idx].force_value()
             

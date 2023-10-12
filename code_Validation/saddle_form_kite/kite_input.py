@@ -76,16 +76,30 @@ bridle_connectivity = np.column_stack((bridle_ci, bridle_cj))
 connections_kite = np.vstack((wing_connectivity, bridle_connectivity))
 
 
+## pulley connectivity
+pulley_point_indices = [24,28]
+pulley_data = kite_functions.extract_pulley_connectivity(
+    points_ini, bridle_ci, bridle_cj, pulley_point_indices, 2)
+
+## correcting the line indices, because total-connectivity wing is first.
+#TODO: this should be integrated in the kite_functionsl
+other_line_pair_corrected_dict = {}
+n_wing_elements = len(wing_connectivity)
+for key_i in pulley_data["other_line_pair"]:
+    corrected_key = str( int(key_i) + n_wing_elements )
+    other_line_pair_corrected_dict[corrected_key] = pulley_data["other_line_pair"][key_i]
+
+params["pulley_other_line_pair"] = other_line_pair_corrected_dict
+
 
 ## compression and tension resistance
 
 # Defining stiffnesses
-stiffness_canopy = 2.5e3
-stiffness_tube =  1.e4
-stiffness_bridle = 1.2e4
+stiffness_canopy = 4e3#2.5e3
+stiffness_tube =  4e3#1.e4
+stiffness_bridle = 3e3 #1.2e4
 
 # initialising connectivities
-pulley_indices = [80]
 #TODO: for now just making each wing element a tube.
 canopy_indices = []
 tube_indices = [i for i,conn in enumerate(wing_connectivity)]
@@ -97,7 +111,10 @@ is_rotational_list = []
 stiffness_list = []
 is_pulley_list = []
 
-for i,conn in enumerate(connections_kite): 
+n_wing_elements = len(wing_connectivity)
+
+for i,conn in enumerate(connections_kite):
+    # if wing elements 
     if float(i) < len(wing_connectivity):
         is_tension_list.append(True)
         is_pulley_list.append(False)
@@ -113,12 +130,18 @@ for i,conn in enumerate(connections_kite):
         else:
             print("ERROR - wing element is neither canopy nor tube?")
 
-    else: # if bridle-lines
+    # if bridle-lines
+    else: 
         is_compression_list.append(False)
         is_tension_list.append(True)
         is_rotational_list.append(True)
         stiffness_list.append(stiffness_bridle)
-        if i in pulley_indices:
+
+        #TODO: weird handling here, but correcting
+        # the indices again
+        if (i-n_wing_elements) in pulley_data["line_indices"]:
+            # print(f'pulley, i: {i}')
+            # print(f'connection[i]: {connections_kite[i]}')
             is_pulley_list.append(True)
         else:
             is_pulley_list.append(False)
@@ -132,7 +155,6 @@ pulley_line_index = 80
 idx_p3,idx_p4 = 20,21
 #rest_length = rest_lengths[pulley_line_index] 
 rest_length = 1.
-params["pulley_other_line_pair"] = {'80': [idx_p3,idx_p4,rest_length]}
 params["is_rotational"] = is_rotational_list
 
 # needed for plate_aero
@@ -141,7 +163,7 @@ area_projected = 19.5
 rho = 1.225
 
 force_aero_plate = kite_functions.calculate_force_aero_plate(plate_point_indices,points_ini,vel_app,area_projected,rho,equal_boolean=False)
-print(f'force_aero_plate: {force_aero_plate}')
+# print(f'force_aero_plate: {force_aero_plate}')
 
 # calculated parameters
 params["n"] = points_ini.shape[0]
@@ -183,26 +205,6 @@ for i,connections_i in enumerate(connections):
 
 # params["l0"] = np.zeros(len(rest_lengths))
 params["l0"] = .99*np.array(rest_lengths)
-
-## pulley connectivity
-pulley_data = kite_functions.extract_pulley_connectivity(
-    points_ini, bridle_ci, bridle_cj, [24,28], 2)
-
-pulley_dict = {}
-for i in range(0,len(pulley_data['ci']),2):
-    # line 1
-    line_1_key = str(pulley_data["line_indices"][i])
-    line_1_idx_p3 = pulley_data["ci"][i]
-    line_1_idx_p4 = pulley_data["cj"][i]
-    line_1_rest_length_p3p4 = np.linalg.norm(points_ini[line_1_idx_p3]-points_ini[line_1_idx_p4])
-    pulley_dict[line_1_key] = np.array([line_1_idx_p3,line_1_idx_p4,line_1_rest_length_p3p4])
-
-    # line 2
-    line_2_key = str(pulley_data["line_indices"][i+1])
-    line_2_idx_p3 = pulley_data["ci"][i+1]
-    line_2_idx_p4 = pulley_data["cj"][i+1]
-    line_2_rest_length_p3p4 = np.linalg.norm(points_ini[line_2_idx_p3]-points_ini[line_2_idx_p4])
-    pulley_dict[line_2_key] = np.array([line_2_idx_p3,line_2_idx_p4,line_2_rest_length_p3p4])
 
 
 if __name__ == "__main__":

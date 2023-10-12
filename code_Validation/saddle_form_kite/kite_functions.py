@@ -401,4 +401,24 @@ def extract_pulley_connectivity(
     pulley_data["ci"] = pulley_ci
     pulley_data["cj"] = pulley_cj
 
+    ##TODO: added for implementing Alex's framework
+    additional_dict = {}
+    for i in range(0,len(pulley_data['line_indices']),2):
+
+        # line 1, key: line 1 and value: line 2 data
+        line_1_key = str(pulley_data["line_indices"][i])
+        line_1_idx_p3 = bridle_ci[pulley_data["line_indices"][i+1]]
+        line_1_idx_p4 = bridle_cj[pulley_data["line_indices"][i+1]]
+        line_1_rest_length_p3p4 = np.linalg.norm(points[line_1_idx_p3]-points[line_1_idx_p4])
+        additional_dict[line_1_key] = np.array([line_1_idx_p3,line_1_idx_p4,line_1_rest_length_p3p4])
+
+        # line 2, key: line 2 and value: line 1 data
+        line_2_key = str(pulley_data["line_indices"][i+1])
+        line_2_idx_p3 = bridle_ci[pulley_data["line_indices"][i]]
+        line_2_idx_p4 = bridle_cj[pulley_data["line_indices"][i]]
+        line_2_rest_length_p3p4 = np.linalg.norm(points[line_2_idx_p3]-points[line_2_idx_p4])
+        additional_dict[line_2_key] = np.array([line_2_idx_p3,line_2_idx_p4,line_2_rest_length_p3p4])
+
+    pulley_data['other_line_pair'] = additional_dict
+
     return pulley_data
