@@ -184,6 +184,25 @@ for i,connections_i in enumerate(connections):
 # params["l0"] = np.zeros(len(rest_lengths))
 params["l0"] = .99*np.array(rest_lengths)
 
+## pulley connectivity
+pulley_data = kite_functions.extract_pulley_connectivity(
+    points_ini, bridle_ci, bridle_cj, [24,28], 2)
+
+pulley_dict = {}
+for i in range(0,len(pulley_data['ci']),2):
+    # line 1
+    line_1_key = str(pulley_data["line_indices"][i])
+    line_1_idx_p3 = pulley_data["ci"][i]
+    line_1_idx_p4 = pulley_data["cj"][i]
+    line_1_rest_length_p3p4 = np.linalg.norm(points_ini[line_1_idx_p3]-points_ini[line_1_idx_p4])
+    pulley_dict[line_1_key] = np.array([line_1_idx_p3,line_1_idx_p4,line_1_rest_length_p3p4])
+
+    # line 2
+    line_2_key = str(pulley_data["line_indices"][i+1])
+    line_2_idx_p3 = pulley_data["ci"][i+1]
+    line_2_idx_p4 = pulley_data["cj"][i+1]
+    line_2_rest_length_p3p4 = np.linalg.norm(points_ini[line_2_idx_p3]-points_ini[line_2_idx_p4])
+    pulley_dict[line_2_key] = np.array([line_2_idx_p3,line_2_idx_p4,line_2_rest_length_p3p4])
 
 
 if __name__ == "__main__":

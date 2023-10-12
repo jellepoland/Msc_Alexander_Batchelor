@@ -196,10 +196,10 @@ class ParticleSystem:
                 p3 = points[idx_p3]
                 p4 = points[idx_p4]
                 norm_p3p4 = np.linalg.norm(p3 - p4)
-                extra_delta_length = norm_p3p4 - rest_length_p3p4
-                fs, fd = self.__springdampers[idx].force_value(extra_delta_length)
+                extra_rest_length = norm_p3p4 - rest_length_p3p4
+                fs, fd = self.__springdampers[idx].force_value(extra_rest_length)
             else:
-                fs, fd = self.__springdampers[idx].force_value(extra_delta_length)
+                fs, fd = self.__springdampers[idx].force_value()
             
             i, j = self.__b[idx]
 
