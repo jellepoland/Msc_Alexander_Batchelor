@@ -52,13 +52,14 @@ def plot(psystem: ParticleSystem, psystem2: ParticleSystem):
 
     n = input.params["n"]
     points = np.array([init_cond_i[0] for init_cond_i in input.init_cond])
+    force_aero_wing = kite_functions.calculate_force_aero_plate(input.plate_point_indices,points,input.vel_app,input.area_projected,input.rho,equal_boolean=False)
 
     start_time = time.time()
     for i,step in enumerate(t_vector):           # propagating the simulation for each timestep and saving results
         
         ## external force
         # Plate-aero static aero
-        force_aero_wing = kite_functions.calculate_force_aero_plate(input.plate_point_indices,points,input.vel_app,input.area_projected,input.rho,equal_boolean=False)
+        # force_aero_wing = kite_functions.calculate_force_aero_plate(input.plate_point_indices,points,input.vel_app,input.area_projected,input.rho,equal_boolean=False)
 
         # print(f'force_aero_wing: {force_aero_wing}')
         # old definition
